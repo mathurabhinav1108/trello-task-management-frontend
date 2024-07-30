@@ -1,10 +1,12 @@
 "use client";
 import Link from 'next/link';
 import React, { useState } from 'react'
+import Listings from "../api/Listings"
+import { redirect  } from 'next/navigation';
 
 export default function page() {
     const [formData, setFormData] = useState({ email: '', password: '' });
-
+    const[loading,setLoading]=useState(false);
     const handleChange = (event) => {
       const { name, value } = event.target;
       setFormData({
@@ -13,10 +15,34 @@ export default function page() {
       });
     };
   
-    const handleSubmit = (event) => {
-      event.preventDefault();
-      // Handle form submission logic here, such as making API calls or validations
-      console.log('Form submitted:', formData);
+    const handleSubmit = (e) => {
+      e.preventDefault();
+      if (loading) {
+        return;
+      }
+      setLoading(true);
+  
+      const main = new Listings();
+      main.Login({
+        email: formData.email,
+        password: formData.password,
+      })
+        .then((res) => {
+          setLoading(false);
+          if (res && res.data && res.data.status) {
+            localStorage.setItem("token", res.data.token);
+            toast.success(res.data.message);
+            setFormData({ email: "", password: "" });
+            redirect ('/'); // Use navigate to route to the homepage
+          } else {
+            toast.error(res.data.message || "An error occurred");
+          }
+        })
+        .catch((error) => {
+          setLoading(false);
+          console.error("Error:", error);
+          toast.error(error.message || "An error occurred");
+        });
     };
   
     return (
@@ -53,7 +79,7 @@ export default function page() {
               <button
                 type="submit"
                 className="w-full p-2 text-white bg-[#766bbc] rounded">
-                Login
+                {loading?"Logging in...":"Login"}
               </button>
             </div>
           </form>

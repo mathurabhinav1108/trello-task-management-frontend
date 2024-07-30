@@ -1,4 +1,5 @@
-import React from "react";
+"use client";
+import React, { useEffect, useState } from "react";
 import { GoBell } from "react-icons/go";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
 import { GoQuestion } from "react-icons/go";
@@ -14,6 +15,8 @@ import Image1 from "../../public/Image1.png";
 import Image2 from "../../public/Image2.png";
 import Image3 from "../../public/Image3.png";
 import { GoClock } from "react-icons/go";
+import { DndProvider, useDrag, useDrop } from 'react-dnd';
+import { HTML5Backend } from 'react-dnd-html5-backend';
 
 import {
   FiSearch,
@@ -24,9 +27,29 @@ import {
 } from "react-icons/fi";
 import { FaPlusCircle } from "react-icons/fa";
 import { MdOutlineSort } from "react-icons/md";
-
+import Listings from "./api/Listings";
+const ItemTypes = {
+  TASK: 'task',
+};
 export default function page() {
-  const data = [
+  const[record,setRecord]=useState(false);
+  const[loading,setLoading]=useState(false);
+  useEffect(() => {
+      setLoading(true);
+      const main = new Listings();
+      main
+        .GetTasks()
+        .then((r) => {
+          setRecord(r?.data?.data);
+          setLoading(false);
+        })
+        .catch((err) => {
+          setRecord();
+          console.log(err);
+          setLoading(false);
+        });
+  }, []);
+  const [tasks, setTasks] = useState([
     {
       name: "Project Alpha",
       title: "Implement Authentication",
@@ -99,7 +122,31 @@ export default function page() {
       time: "12:00",
       type: "to-do",
     },
-  ];
+  ]);
+
+  const moveTask = (draggedItem, newType) => {
+    console.log("Dragged item",draggedItem)
+    setTasks((prevTasks) =>
+      prevTasks.map((task) =>
+        task.name === draggedItem.id ? { ...task, type: newType } : task
+      )
+    );
+  };
+
+  const renderColumn = (title, filterType) => (
+    <div>
+      <h2 className="flex justify-between font-bold text-[#757575] text-lg mb-4">
+        {title}
+      </h2>
+      <div className="space-y-4">
+        {tasks
+          .filter((item) => item.type === filterType)
+          .map((item) => (
+            <TaskCard key={item.name} item={item} onDrop={moveTask} />
+          ))}
+      </div>
+    </div>
+  );
 
   return (
     <div className="flex h-screen">
@@ -162,7 +209,7 @@ export default function page() {
             <FaPlusCircle size={24} />
           </button>
         </div>
-        <div className="absolute bottom-0 left-0 flex items-center bg-gray-100 p-4 rounded-lg shadow-md">
+        <div className="fixed bottom-0 left-0 flex items-center bg-gray-100 p-4 rounded-lg shadow-md">
           <div className="flex-shrink-0">
             <GoDownload className="w-6 h-6 text-gray-600" />
           </div>
@@ -272,140 +319,47 @@ export default function page() {
         </div>
 
         {/* Task Lists */}
-        <div className="grid grid-cols-4 gap-6">
-          {/* To Do */}
-          <div>
-            <h2 className="flex justify-between font-bold text-[#757575] text-lg mb-4">
-              To do
-              <MdOutlineSort />
-            </h2>
-            <div className="space-y-4">
-              {data &&
-                data
-                  .filter((item) => item.type === "to-do")
-                  .map((item, index) => (
-                    <TaskCard
-                      key={index}
-                      title={item?.title}
-                      text={item?.text}
-                      priority={item?.priority}
-                      date={item?.date}
-                      time={item?.time}
-                    />
-                  ))}
-              <button className="items-center flex justify-between w-full p-2 bg-black text-white rounded-md">
-                Add new
-                <FiPlus size={20} />
-              </button>
-            </div>
-          </div>
-
-          {/* In Progress */}
-          <div>
-            <h2 className="flex justify-between font-bold text-[#757575] text-lg mb-4">
-              In Progress
-              <MdOutlineSort />
-            </h2>
-            <div className="space-y-4">
-              {data &&
-                data
-                  .filter((item) => item.type === "progress")
-                  .map((item, index) => (
-                    <TaskCard
-                      key={index}
-                      title={item?.title}
-                      text={item?.text}
-                      priority={item?.priority}
-                      date={item?.date}
-                      time={item?.time}
-                    />
-                  ))}
-              <button className="items-center flex justify-between w-full p-2 bg-black text-white rounded-md">
-                Add new
-                <FiPlus size={20} />
-              </button>
-            </div>
-          </div>
-
-          {/* Under Review */}
-          <div>
-            <h2 className="flex justify-between font-bold text-[#757575] text-lg mb-4">
-              Under Review
-              <MdOutlineSort />
-            </h2>
-            <div className="space-y-4">
-              {data &&
-                data
-                  .filter((item) => item.type === "review")
-                  .map((item, index) => (
-                    <TaskCard
-                      key={index}
-                      title={item?.title}
-                      text={item?.text}
-                      priority={item?.priority}
-                      date={item?.date}
-                      time={item?.time}
-                    />
-                  ))}
-              <button className="items-center flex justify-between w-full p-2 bg-black text-white rounded-md">
-                Add new
-                <FiPlus size={20} />
-              </button>
-            </div>
-          </div>
-
-          {/* Finished */}
-          <div>
-            <h2 className="flex justify-between font-bold text-[#757575] text-lg mb-4">
-              Finished
-              <MdOutlineSort />
-            </h2>
-            <div className="space-y-4">
-              {data &&
-                data
-                  .filter((item) => item.type === "finished")
-                  .map((item, index) => (
-                    <TaskCard
-                      key={index}
-                      title={item?.title}
-                      text={item?.text}
-                      priority={item?.priority}
-                      date={item?.date}
-                      time={item?.time}
-                    />
-                  ))}
-              <button className="items-center flex justify-between w-full p-2 bg-black text-white rounded-md">
-                Add new
-                <FiPlus size={20} />
-              </button>
-            </div>
-          </div>
-        </div>
+        <DndProvider backend={HTML5Backend}>
+      <div className="grid grid-cols-4 gap-6">
+        {renderColumn('To Do', 'to-do')}
+        {renderColumn('In Progress', 'progress')}
+        {renderColumn('Under Review', 'review')}
+        {renderColumn('Finished', 'finished')}
+      </div>
+    </DndProvider>
       </main>
     </div>
   );
 }
-function TaskCard({ title, priority, date, text, time }) {
+function TaskCard({ item, onDrop }) {
   const priorityColor = {
     urgent: "bg-[#FF6B6B] text-white",
     medium: "bg-[#FFA235] text-white",
     low: "bg-[#0ECC5A] text-white",
   };
 
+  const [, ref] = useDrag({
+    type: ItemTypes.TASK,
+    item: { id: item.name, type: item.type },
+  });
+
+  const [, drop] = useDrop({
+    accept: ItemTypes.TASK,
+    drop: (draggedItem) => onDrop(draggedItem, item.type),
+  });
+
   return (
-    <div className="p-4 bg-white rounded shadow-sm border-[1px] border-[#DEDEDE]">
-      <h3 className="font-bold text-[#606060] text-md">{title}</h3>
-      <p className="text-[#868686] text-sm">{text}</p>
-      <div
-        className={`capitalize w-fit mt-2 p-1 text-xs rounded ${priorityColor[priority]}`}
-      >
-        {priority}
+    <div ref={(node) => ref(drop(node))} className="p-4 bg-white rounded shadow-sm border-[1px] border-[#DEDEDE]">
+      <h3 className="font-bold text-[#606060] text-md">{item.title}</h3>
+      <p className="text-[#868686] text-sm">{item.text}</p>
+      <div className={`capitalize w-fit mt-2 p-1 text-xs rounded ${priorityColor[item.priority]}`}>
+        {item.priority}
       </div>
       <div className="flex gap-2 items-center mt-2 text-sm text-gray-600">
         <GoClock size={18} />
-        {date}
+        {item.date}
       </div>
-      <div className="mt-2 text-sm text-gray-600">{time}</div>
+      <div className="mt-2 text-sm text-gray-600">{item.time}</div>
     </div>
   );
 }

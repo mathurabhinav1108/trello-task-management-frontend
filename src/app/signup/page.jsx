@@ -1,10 +1,12 @@
 "use client";
 import Link from 'next/link';
 import React, { useState } from 'react'
+import Listings from '../api/Listings';
+import { redirect  } from 'next/navigation';
 
 export default function page() {
     const [formData, setFormData] = useState({ name: '', email: '', password: '' });
-
+    const[loading,setLoading]=useState(false);
     const handleChange = (event) => {
       const { name, value } = event.target;
       setFormData({
@@ -13,10 +15,36 @@ export default function page() {
       });
     };
   
-    const handleSubmit = (event) => {
-      event.preventDefault();
-      // Handle form submission logic here, such as making API calls or validations
-      console.log('Form submitted:', formData);
+    const handleSubmit = (e) => {
+      e.preventDefault();
+    if (loading == true) { return; }
+    setLoading(true);
+    const main = new Listings();
+    const response = main.Signup({
+      name: formData.name.trim(),
+      email: formData.email.trim(),
+      password: formData.password.trim(),
+    });
+    response
+      .then((res) => {
+        if (res && res.data && res.data.status) {
+          toast.success(res.data.message);
+          setFormData({
+            name: "",
+            email: "",
+            password: "",
+          });
+          redirect("/login");
+        } else {
+          toast.error(res?.data.message);
+          setLoading(false);
+        }
+
+      })
+      .catch((error) => {
+        toast.error(error?.response.data);
+        setLoading(false);
+      });
     };
   
     return (
