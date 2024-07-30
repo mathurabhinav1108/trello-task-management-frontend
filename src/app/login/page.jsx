@@ -45,7 +45,7 @@ export default function page() {
                 name="password"
                 value={formData.password}
                 onChange={handleChange}
-                className="w-full mt-1 p-2 border bg-[#EBEBEB] border-gray-300 rounded-md shadow-sm "
+                className="w-full mt-1 p-2 border bg-[#EBEBEB] border-gray-300 rounded-md shadow-sm"
                 placeholder="password"
               />
             </div>
