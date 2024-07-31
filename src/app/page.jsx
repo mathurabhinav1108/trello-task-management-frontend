@@ -31,6 +31,7 @@ import Listings from "./api/Listings";
 import toast from "react-hot-toast";
 import { useRouter  } from 'next/navigation';
 import Link from "next/link";
+import { FaRegTrashCan } from "react-icons/fa6";
 
 const ItemTypes = {
   TASK: 'task',
