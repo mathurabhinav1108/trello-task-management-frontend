@@ -5,7 +5,7 @@ import Listings from "../api/Listings"
 import { redirect  } from 'next/navigation';
 import toast from 'react-hot-toast';
 
-export default function page() {
+export default function Page() {
     const [formData, setFormData] = useState({ email: '', password: '' });
     const[loading,setLoading]=useState(false);
     const handleChange = (event) => {
@@ -85,9 +85,9 @@ export default function page() {
             </div>
           </form>
           <p className="mt-4 text-center text-sm text-gray-600">
-            Don't have an account? Create a 
-            <Link href="/signup" className="text-blue-500 hover:underline"> new account</Link>.
-          </p>
+    Don&apos;t have an account? Create a 
+    <Link href="/signup" className="text-blue-500 hover:underline"> new account</Link>.
+</p>
         </div>
       </div>
     );

@@ -22,9 +22,6 @@ export default function RootLayout({
             toastOptions={{
               position: "top-right",
               className: "",
-              style: {
-                "font-size": "14px",
-              },
             }}
           />
       <body className={inter.className}>{children}</body>

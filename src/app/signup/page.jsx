@@ -5,7 +5,7 @@ import Listings from '../api/Listings';
 import { redirect  } from 'next/navigation';
 import toast from 'react-hot-toast';
 
-export default function page() {
+export default function Page() {
     const [formData, setFormData] = useState({ name: '', email: '', password: '' });
     const[loading,setLoading]=useState(false);
     const handleChange = (event) => {
