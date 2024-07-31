@@ -2,7 +2,7 @@
 import Link from 'next/link';
 import React, { useState } from 'react'
 import Listings from '../api/Listings';
-import { redirect  } from 'next/navigation';
+import { useRouter  } from 'next/navigation';
 import toast from 'react-hot-toast';
 
 export default function Page() {
@@ -15,6 +15,7 @@ export default function Page() {
         [name]: value,
       });
     };
+    const router = useRouter();
   
     const handleSubmit = (e) => {
       e.preventDefault();
@@ -36,7 +37,7 @@ export default function Page() {
             password: "",
           });
           setLoading(false);
-          redirect("/login");
+          router.push("/login");
         } else {
           toast.error(res?.data.message);
           setLoading(false);

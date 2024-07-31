@@ -28,14 +28,26 @@ import {
 import { FaPlusCircle } from "react-icons/fa";
 import { MdOutlineSort } from "react-icons/md";
 import Listings from "./api/Listings";
+import toast from "react-hot-toast";
+import { useRouter  } from 'next/navigation';
+import Link from "next/link";
+
 const ItemTypes = {
   TASK: 'task',
 };
 export default function Page() {
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
+    const tokens = localStorage.getItem("token");
+if (tokens) {
+} else {
+  toast.error("Login First");
+  router.push("/login");
+  // No token found, handle the unauthenticated state
+}
     setLoading(true);
     const main = new Listings();
     main
@@ -51,7 +63,28 @@ export default function Page() {
       });
   }, []);
 
-  console.log("tasks",tasks)
+  const taskTypeChange = (uuid, newtype) => {
+    const main = new Listings();
+        main.MoveTask({
+            uuid: uuid,
+            type: newtype,
+        })
+        .then((res) => {
+            if (res && res.data && res.data.status) {
+                localStorage.setItem("token", res.data.token);
+                toast.success(res.data.message);
+            } else {
+                toast.error(res.data.message || "An error occurred");
+            }
+        })
+        .catch((error) => {
+            setLoading(false);
+            console.error("Error:", error);
+            toast.error(error.message || "An error occurred");
+        });
+    
+  }
+
   const moveTask = (draggedItem, newType) => {
     console.log("Dragged item UUID:", draggedItem.uuid);
     console.log("New category:", newType);
@@ -60,6 +93,13 @@ export default function Page() {
         task.uuid === draggedItem.uuid ? { ...task, type: newType } : task
       )
     );
+    taskTypeChange(draggedItem.uuid,newType);
+  };
+
+  const handleLogout = () => {
+   localStorage && localStorage.removeItem("token"); // Ensure token key is a string
+    toast.success("Logout Successful");
+    router.push("/login");
   };
 
   const renderColumn = (title, filterType) => (
@@ -90,7 +130,8 @@ export default function Page() {
                 <GoBell color={"#666666"} />
                 <AiOutlineLoading3Quarters color={"#666666"} />
                 <p className="text-[#666666]">{">>"}</p>
-                <button className="bg-[#F4F4F4] text-[#797979] text-sm px-[8px] py-[8px]">
+                <button className="bg-[#F4F4F4] text-[#797979] text-sm px-[8px] py-[8px]"
+                onClick={handleLogout}>
                   Logout
                 </button>
               </div>
@@ -133,10 +174,12 @@ export default function Page() {
               Analytics
             </a>
           </nav>
+          <Link href="/task">
           <button className="items-center justify-center flex gap-2 mt-2 w-full bg-[#382aad] text-white p-2 rounded-md">
             Create new task
             <FaPlusCircle size={24} />
           </button>
+          </Link>
         </div>
         <div className="fixed bottom-0 left-0 flex items-center bg-gray-100 p-4 rounded-lg shadow-md">
           <div className="flex-shrink-0">
@@ -240,10 +283,12 @@ export default function Page() {
             </button>
 
             {/* Create New Button */}
+            <Link href="/task">
             <button className="ml-auto flex items-center space-x-2 bg-[#382aad] text-white px-4 py-2 rounded-md">
               <span>Create new</span>
               <FaPlusCircle />
             </button>
+            </Link>
           </div>
         </div>
 

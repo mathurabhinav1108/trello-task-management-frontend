@@ -17,6 +17,9 @@ class Listings extends Component {
   async DeleteTask(data) {
     return Api.post("task/delete", data);
   }
+  async MoveTask(data) {
+    return Api.post("task/move", data);
+  }
    
   render() {
     return (
