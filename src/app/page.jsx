@@ -31,104 +31,33 @@ import Listings from "./api/Listings";
 const ItemTypes = {
   TASK: 'task',
 };
-export default function page() {
-  const[record,setRecord]=useState(false);
-  const[loading,setLoading]=useState(false);
-  useEffect(() => {
-      setLoading(true);
-      const main = new Listings();
-      main
-        .GetTasks()
-        .then((r) => {
-          setRecord(r?.data?.data);
-          setLoading(false);
-        })
-        .catch((err) => {
-          setRecord();
-          console.log(err);
-          setLoading(false);
-        });
-  }, []);
-  const [tasks, setTasks] = useState([
-    {
-      name: "Project Alpha",
-      title: "Implement Authentication",
-      priority: "urgent",
-      date: "2024-07-28",
-      text: "Develop and integrate user authentication into the application.",
-      time: "14:30",
-      type: "to-do",
-    },
-    {
-      name: "Project Beta",
-      title: "Design User Interface",
-      priority: "medium",
-      date: "2024-07-30",
-      text: "Create a user-friendly interface for the main dashboard.",
-      time: "10:00",
-      type: "progress",
-    },
-    {
-      name: "Project Gamma",
-      title: "Database Optimization",
-      priority: "low",
-      date: "2024-08-01",
-      text: "Optimize database queries to improve performance.",
-      time: "09:00",
-      type: "review",
-    },
-    {
-      name: "Project Delta",
-      title: "API Documentation",
-      priority: "medium",
-      date: "2024-08-02",
-      text: "Document all API endpoints for external developers.",
-      time: "11:30",
-      type: "to-do",
-    },
-    {
-      name: "Project Epsilon",
-      title: "Security Audit",
-      priority: "urgent",
-      date: "2024-08-05",
-      text: "Conduct a security audit to identify vulnerabilities.",
-      time: "15:00",
-      type: "progress",
-    },
-    {
-      name: "Project Zeta",
-      title: "Feature Testing",
-      priority: "low",
-      date: "2024-08-10",
-      text: "Test new features for bugs and issues.",
-      time: "13:45",
-      type: "review",
-    },
-    {
-      name: "Project Eta",
-      title: "Deployment Preparation",
-      priority: "urgent",
-      date: "2024-08-12",
-      text: "Prepare the application for deployment to the production environment.",
-      time: "16:00",
-      type: "finished",
-    },
-    {
-      name: "Project Theta",
-      title: "Customer Feedback",
-      priority: "medium",
-      date: "2024-08-15",
-      text: "Collect and analyze customer feedback for the recent update.",
-      time: "12:00",
-      type: "to-do",
-    },
-  ]);
+export default function Page() {
+  const [tasks, setTasks] = useState([]);
+  const [loading, setLoading] = useState(false);
 
+  useEffect(() => {
+    setLoading(true);
+    const main = new Listings();
+    main
+      .GetTasks()
+      .then((r) => {
+        setTasks(r?.data?.tasks);
+        setLoading(false);
+      })
+      .catch((err) => {
+        setTasks([]);
+        console.log(err);
+        setLoading(false);
+      });
+  }, []);
+
+  console.log("tasks",tasks)
   const moveTask = (draggedItem, newType) => {
-    console.log("Dragged item",draggedItem)
+    console.log("Dragged item UUID:", draggedItem.uuid);
+    console.log("New category:", newType);
     setTasks((prevTasks) =>
       prevTasks.map((task) =>
-        task.name === draggedItem.id ? { ...task, type: newType } : task
+        task.uuid === draggedItem.uuid ? { ...task, type: newType } : task
       )
     );
   };
@@ -142,7 +71,7 @@ export default function page() {
         {tasks
           .filter((item) => item.type === filterType)
           .map((item) => (
-            <TaskCard key={item.name} item={item} onDrop={moveTask} />
+            <TaskCard key={item.uuid} item={item} onDrop={moveTask} />
           ))}
       </div>
     </div>
@@ -338,28 +267,37 @@ function TaskCard({ item, onDrop }) {
     low: "bg-[#0ECC5A] text-white",
   };
 
-  const [, ref] = useDrag({
+  const [{ isDragging }, dragRef] = useDrag({
     type: ItemTypes.TASK,
-    item: { id: item.name, type: item.type },
+    item: { uuid: item.uuid, type: item.type },
+    collect: (monitor) => ({
+      isDragging: monitor.isDragging(),
+    }),
   });
 
-  const [, drop] = useDrop({
+  const [, dropRef] = useDrop({
     accept: ItemTypes.TASK,
     drop: (draggedItem) => onDrop(draggedItem, item.type),
   });
 
+  // Combining refs
+  const combinedRef = (node) => {
+    dragRef(node);
+    dropRef(node);
+  };
+
   return (
-    <div ref={(node) => ref(drop(node))} className="p-4 bg-white rounded shadow-sm border-[1px] border-[#DEDEDE]">
+    <div ref={combinedRef} className={`p-4 bg-white rounded shadow-sm border-[1px] border-[#DEDEDE] ${isDragging ? 'opacity-50' : ''}`}>
       <h3 className="font-bold text-[#606060] text-md">{item.title}</h3>
-      <p className="text-[#868686] text-sm">{item.text}</p>
+      <p className="text-[#868686] text-sm">{item.description}</p>
       <div className={`capitalize w-fit mt-2 p-1 text-xs rounded ${priorityColor[item.priority]}`}>
         {item.priority}
       </div>
       <div className="flex gap-2 items-center mt-2 text-sm text-gray-600">
         <GoClock size={18} />
-        {item.date}
+        {item.deadline}
       </div>
-      <div className="mt-2 text-sm text-gray-600">{item.time}</div>
     </div>
   );
 }
+

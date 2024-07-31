@@ -3,6 +3,7 @@ import Link from 'next/link';
 import React, { useState } from 'react'
 import Listings from '../api/Listings';
 import { redirect  } from 'next/navigation';
+import toast from 'react-hot-toast';
 
 export default function page() {
     const [formData, setFormData] = useState({ name: '', email: '', password: '' });
@@ -34,6 +35,7 @@ export default function page() {
             email: "",
             password: "",
           });
+          setLoading(false);
           redirect("/login");
         } else {
           toast.error(res?.data.message);
@@ -91,7 +93,7 @@ export default function page() {
               <button
                 type="submit"
                 className="w-full p-2 text-white bg-[#766bbc] rounded">
-                Login
+              {loading?"Processing...":"Sign up"}
               </button>
             </div>
           </form>

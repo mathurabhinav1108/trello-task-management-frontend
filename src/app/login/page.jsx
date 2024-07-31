@@ -3,6 +3,7 @@ import Link from 'next/link';
 import React, { useState } from 'react'
 import Listings from "../api/Listings"
 import { redirect  } from 'next/navigation';
+import toast from 'react-hot-toast';
 
 export default function page() {
     const [formData, setFormData] = useState({ email: '', password: '' });
