@@ -35,6 +35,25 @@ import Link from "next/link";
 const ItemTypes = {
   TASK: 'task',
 };
+const handleDelete = (uuid)=>{
+  const main = new Listings();
+      main.DeleteTask({
+          uuid: uuid,
+      })
+      .then((res) => {
+          if (res && res.data && res.data.status) {
+              toast.success(res.data.message);
+          } else {
+              toast.error(res.data.message || "An error occurred");
+          }
+      })
+      .catch((error) => {
+          setLoading(false);
+          console.error("Error:", error);
+          toast.error(error.message || "An error occurred");
+      });
+
+}
 export default function Page() {
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -62,7 +81,6 @@ if (tokens) {
         setLoading(false);
       });
   }, []);
-
   const taskTypeChange = (uuid, newtype) => {
     const main = new Listings();
         main.MoveTask({
@@ -71,7 +89,6 @@ if (tokens) {
         })
         .then((res) => {
             if (res && res.data && res.data.status) {
-                localStorage.setItem("token", res.data.token);
                 toast.success(res.data.message);
             } else {
                 toast.error(res.data.message || "An error occurred");
@@ -82,7 +99,6 @@ if (tokens) {
             console.error("Error:", error);
             toast.error(error.message || "An error occurred");
         });
-    
   }
 
   const moveTask = (draggedItem, newType) => {
@@ -334,6 +350,9 @@ function TaskCard({ item, onDrop }) {
   return (
     <div ref={combinedRef} className={`p-4 bg-white rounded shadow-sm border-[1px] border-[#DEDEDE] ${isDragging ? 'opacity-50' : ''}`}>
       <h3 className="font-bold text-[#606060] text-md">{item.title}</h3>
+      <button onClick={handleDelete(item?.uuid)}>
+      <FaRegTrashCan  size={18}/>
+      </button>
       <p className="text-[#868686] text-sm">{item.description}</p>
       <div className={`capitalize w-fit mt-2 p-1 text-xs rounded ${priorityColor[item.priority]}`}>
         {item.priority}
