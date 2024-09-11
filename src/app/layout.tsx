@@ -17,15 +17,15 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <>
-           <Toaster
-            toastOptions={{
-              position: "top-right",
-              className: "",
-            }}
-          />
-      <body className={inter.className}>{children}</body>
-      </>
+      <body className={inter.className}>
+        <Toaster
+          toastOptions={{
+            position: "top-right",
+            className: "",
+          }}
+        />
+        {children}
+      </body>
     </html>
   );
 }

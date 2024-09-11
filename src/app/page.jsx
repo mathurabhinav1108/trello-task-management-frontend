@@ -15,8 +15,8 @@ import Image1 from "../../public/Image1.png";
 import Image2 from "../../public/Image2.png";
 import Image3 from "../../public/Image3.png";
 import { GoClock } from "react-icons/go";
-import { DndProvider, useDrag, useDrop } from 'react-dnd';
-import { HTML5Backend } from 'react-dnd-html5-backend';
+import { DndProvider, useDrag, useDrop } from "react-dnd";
+import { HTML5Backend } from "react-dnd-html5-backend";
 
 import {
   FiSearch,
@@ -29,32 +29,33 @@ import { FaPlusCircle } from "react-icons/fa";
 import { MdOutlineSort } from "react-icons/md";
 import Listings from "./api/Listings";
 import toast from "react-hot-toast";
-import { useRouter  } from 'next/navigation';
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { FaRegTrashCan } from "react-icons/fa6";
 
 const ItemTypes = {
-  TASK: 'task',
+  TASK: "task",
 };
-const handleDelete = (uuid)=>{
+const handleDelete = (uuid) => {
   const main = new Listings();
-      main.DeleteTask({
-          uuid: uuid,
-      })
-      .then((res) => {
-          if (res && res.data && res.data.status) {
-              toast.success(res.data.message);
-          } else {
-              toast.error(res.data.message || "An error occurred");
-          }
-      })
-      .catch((error) => {
-          setLoading(false);
-          console.error("Error:", error);
-          toast.error(error.message || "An error occurred");
-      });
-
-}
+  main
+    .DeleteTask({
+      uuid: uuid,
+    })
+    .then((res) => {
+      if (res && res.data && res.data.status) {
+        toast.success(res.data.message);
+        window.location.reload();
+      } else {
+        toast.error(res.data.message || "An error occurred");
+      }
+    })
+    .catch((error) => {
+      setLoading(false);
+      console.error("Error:", error);
+      toast.error(error.message || "An error occurred");
+    });
+};
 export default function Page() {
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -62,21 +63,23 @@ export default function Page() {
 
   useEffect(() => {
     const tokens = localStorage.getItem("token");
-if (tokens) {
-} else {
-  toast.error("Login First");
-  router.push("/login");
-  // No token found, handle the unauthenticated state
-}
+    if (tokens) {
+    } else {
+      toast.error("Login First");
+      router.push("/login");
+      // No token found, handle the unauthenticated state
+    }
     setLoading(true);
     const main = new Listings();
     main
       .GetTasks()
       .then((r) => {
+        console.log("r?.data?.tasks", r?.data?.tasks);
         setTasks(r?.data?.tasks);
         setLoading(false);
       })
       .catch((err) => {
+        console.log("Hello");
         setTasks([]);
         console.log(err);
         setLoading(false);
@@ -84,37 +87,38 @@ if (tokens) {
   }, []);
   const taskTypeChange = (uuid, newtype) => {
     const main = new Listings();
-        main.MoveTask({
-            uuid: uuid,
-            type: newtype,
-        })
-        .then((res) => {
-            if (res && res.data && res.data.status) {
-                toast.success(res.data.message);
-            } else {
-                toast.error(res.data.message || "An error occurred");
-            }
-        })
-        .catch((error) => {
-            setLoading(false);
-            console.error("Error:", error);
-            toast.error(error.message || "An error occurred");
-        });
-  }
+    main
+      .MoveTask({
+        uuid: uuid,
+        type: newtype,
+      })
+      .then((res) => {
+        if (res && res.data && res.data.status) {
+          toast.success(res.data.message);
+        } else {
+          toast.error(res.data.message || "An error occurred");
+        }
+      })
+      .catch((error) => {
+        setLoading(false);
+        console.error("Error:", error);
+        toast.error(error.message || "An error occurred");
+      });
+  };
 
-  const moveTask = (draggedItem, newType) => {
+  const moveTask = (draggedItem, newStatus) => {
     console.log("Dragged item UUID:", draggedItem.uuid);
-    console.log("New category:", newType);
+    console.log("New status:", newStatus);
     setTasks((prevTasks) =>
       prevTasks.map((task) =>
-        task.uuid === draggedItem.uuid ? { ...task, type: newType } : task
+        task.uuid === draggedItem.uuid ? { ...task, status: newStatus } : task
       )
     );
-    taskTypeChange(draggedItem.uuid,newType);
+    taskTypeChange(draggedItem.uuid, newStatus); // pass newStatus here
   };
 
   const handleLogout = () => {
-   localStorage && localStorage.removeItem("token"); // Ensure token key is a string
+    localStorage && localStorage.removeItem("token"); // Ensure token key is a string
     toast.success("Logout Successful");
     router.push("/login");
   };
@@ -125,11 +129,12 @@ if (tokens) {
         {title}
       </h2>
       <div className="space-y-4">
-        {tasks
-          .filter((item) => item.type === filterType)
-          .map((item) => (
-            <TaskCard key={item.uuid} item={item} onDrop={moveTask} />
-          ))}
+        {tasks &&
+          tasks
+            .filter((item) => item.status === filterType) // match exact status
+            .map((item) => (
+              <TaskCard key={item.uuid} item={item} onDrop={moveTask} />
+            ))}
       </div>
     </div>
   );
@@ -147,8 +152,10 @@ if (tokens) {
                 <GoBell color={"#666666"} />
                 <AiOutlineLoading3Quarters color={"#666666"} />
                 <p className="text-[#666666]">{">>"}</p>
-                <button className="bg-[#F4F4F4] text-[#797979] text-sm px-[8px] py-[8px]"
-                onClick={handleLogout}>
+                <button
+                  className="bg-[#F4F4F4] text-[#797979] text-sm px-[8px] py-[8px]"
+                  onClick={handleLogout}
+                >
                   Logout
                 </button>
               </div>
@@ -192,10 +199,10 @@ if (tokens) {
             </a>
           </nav>
           <Link href="/task">
-          <button className="items-center justify-center flex gap-2 mt-2 w-full bg-[#382aad] text-white p-2 rounded-md">
-            Create new task
-            <FaPlusCircle size={24} />
-          </button>
+            <button className="items-center justify-center flex gap-2 mt-2 w-full bg-[#382aad] text-white p-2 rounded-md">
+              Create new task
+              <FaPlusCircle size={24} />
+            </button>
           </Link>
         </div>
         <div className="fixed bottom-0 left-0 flex items-center bg-gray-100 p-4 rounded-lg shadow-md">
@@ -301,23 +308,23 @@ if (tokens) {
 
             {/* Create New Button */}
             <Link href="/task">
-            <button className="ml-auto flex items-center space-x-2 bg-[#382aad] text-white px-4 py-2 rounded-md">
-              <span>Create new</span>
-              <FaPlusCircle />
-            </button>
+              <button className="ml-auto flex items-center space-x-2 bg-[#382aad] text-white px-4 py-2 rounded-md">
+                <span>Create new</span>
+                <FaPlusCircle />
+              </button>
             </Link>
           </div>
         </div>
 
         {/* Task Lists */}
         <DndProvider backend={HTML5Backend}>
-      <div className="grid grid-cols-4 gap-6">
-        {renderColumn('To Do', 'to-do')}
-        {renderColumn('In Progress', 'progress')}
-        {renderColumn('Under Review', 'review')}
-        {renderColumn('Finished', 'finished')}
-      </div>
-    </DndProvider>
+          <div className="grid grid-cols-4 gap-6">
+            {renderColumn("To Do", "To Do")}
+            {renderColumn("In Progress", "In Progress")}
+            {renderColumn("Under review", "Under review")}
+            {renderColumn("Completed", "Completed")}
+          </div>
+        </DndProvider>
       </main>
     </div>
   );
@@ -331,7 +338,7 @@ function TaskCard({ item, onDrop }) {
 
   const [{ isDragging }, dragRef] = useDrag({
     type: ItemTypes.TASK,
-    item: { uuid: item.uuid, type: item.type },
+    item: { uuid: item.uuid, type: item.status },
     collect: (monitor) => ({
       isDragging: monitor.isDragging(),
     }),
@@ -339,7 +346,7 @@ function TaskCard({ item, onDrop }) {
 
   const [, dropRef] = useDrop({
     accept: ItemTypes.TASK,
-    drop: (draggedItem) => onDrop(draggedItem, item.type),
+    drop: (draggedItem) => onDrop(draggedItem, item.status),
   });
 
   // Combining refs
@@ -349,13 +356,24 @@ function TaskCard({ item, onDrop }) {
   };
 
   return (
-    <div ref={combinedRef} className={`p-4 bg-white rounded shadow-sm border-[1px] border-[#DEDEDE] ${isDragging ? 'opacity-50' : ''}`}>
+    <div
+      ref={combinedRef}
+      className={`p-4 bg-white rounded shadow-sm border-[1px] border-[#DEDEDE] ${
+        isDragging ? "opacity-50" : ""
+      }`}
+    >
       <h3 className="font-bold text-[#606060] text-md">{item.title}</h3>
-      <button onClick={handleDelete(item?.uuid)}>
-      <FaRegTrashCan  size={18}/>
-      </button>
+      <button 
+  onClick={() => handleDelete(item?.uuid)}
+>
+  <FaRegTrashCan size={18} />
+</button>
       <p className="text-[#868686] text-sm">{item.description}</p>
-      <div className={`capitalize w-fit mt-2 p-1 text-xs rounded ${priorityColor[item.priority]}`}>
+      <div
+        className={`capitalize w-fit mt-2 p-1 text-xs rounded ${
+          priorityColor[item.priority]
+        }`}
+      >
         {item.priority}
       </div>
       <div className="flex gap-2 items-center mt-2 text-sm text-gray-600">
@@ -365,4 +383,3 @@ function TaskCard({ item, onDrop }) {
     </div>
   );
 }
-
