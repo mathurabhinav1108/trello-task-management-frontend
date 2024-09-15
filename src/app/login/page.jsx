@@ -34,6 +34,7 @@ export default function Page() {
             setLoading(false);
             if (res && res.data && res.data.status) {
                 localStorage.setItem("token", res.data.token);
+                localStorage.setItem("name", res.data.user.name);
                 toast.success(res.data.message);
                 setFormData({ email: "", password: "" });
                 router.push('/'); // Navigate to the homepage using router.push

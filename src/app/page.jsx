@@ -59,10 +59,13 @@ const handleDelete = (uuid) => {
 export default function Page() {
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(false);
+  const[name,setName]=useState("");
   const router = useRouter();
 
   useEffect(() => {
     const tokens = localStorage.getItem("token");
+    const userName=localStorage.getItem("name");
+    setName(userName);
     if (tokens) {
     } else {
       toast.error("Login First");
@@ -142,7 +145,7 @@ export default function Page() {
   return (
     <div className="flex h-screen">
       {/* Sidebar */}
-      <aside className="w-64 p-4 flex flex-col justify-between">
+      {/* <aside className="w-64 p-4 flex flex-col justify-between">
         <div>
           <div className="flex items-center space-x-3 mb-4">
             <div className="h-10 w-10 rounded-full bg-gray-300"></div>
@@ -216,17 +219,19 @@ export default function Page() {
             <p className="text-sm text-gray-600">Get the full experience</p>
           </div>
         </div>
-      </aside>
+      </aside> */}
 
       {/* Main Content */}
       <main className="flex-1 p-6 bg-gray-50">
         {/* Header */}
         <header className="mb-6">
           <div className="flex mb-4 justify-between">
-            <h1 className="text-2xl font-bold">Good morning, Joe!</h1>
-            <h2 className="text-sm flex gap-2 items-center text-[#080808]">
-              Help & feedback
-              <GoQuestion />
+            <h1 className="text-2xl font-bold">Hello, {name}!</h1>
+            <h2
+              className="text-sm flex gap-2 items-center text-[#080808] cursor-pointer"
+              onClick={() => handleLogout()}
+            >
+              Logout
             </h2>
           </div>
           <div className="grid grid-cols-3 gap-4 mb-2">
@@ -275,18 +280,19 @@ export default function Page() {
         {/* Heafer before tasks */}
         <div className="justify-between flex items-center space-x-4 pb-2 bg-gray-50 border-b border-gray-200 mb-4">
           {/* Search Input */}
-          <div className="flex items-center border border-gray-300 rounded-md bg-white px-2 py-1">
+          {/* <div className="flex items-center border border-gray-300 rounded-md bg-white px-2 py-1">
             <FiSearch className="text-[#797979] mr-2" />
             <input
               type="text"
               placeholder="Search"
               className="outline-none bg-transparent"
             />
-          </div>
+          </div> */}
+          <h1 className="font-bold text-xl ">Your Tasks</h1>
 
           {/* Action Buttons */}
           <div className="flex gap-4">
-            <button className="flex items-center space-x-1 text-[#797979]">
+            {/* <button className="flex items-center space-x-1 text-[#797979]">
               <span>Calendar view</span>
               <FiCalendar />
             </button>
@@ -304,7 +310,7 @@ export default function Page() {
             <button className="flex items-center space-x-1 text-[#797979]">
               <span>Share</span>
               <FiShare2 />
-            </button>
+            </button> */}
 
             {/* Create New Button */}
             <Link href="/task">
@@ -362,12 +368,12 @@ function TaskCard({ item, onDrop }) {
         isDragging ? "opacity-50" : ""
       }`}
     >
+      <div className="flex justify-between">
       <h3 className="font-bold text-[#606060] text-md">{item.title}</h3>
-      <button 
-  onClick={() => handleDelete(item?.uuid)}
->
-  <FaRegTrashCan size={18} />
-</button>
+      <button onClick={() => handleDelete(item?.uuid)}>
+        <FaRegTrashCan size={18} />
+      </button>
+      </div>
       <p className="text-[#868686] text-sm">{item.description}</p>
       <div
         className={`capitalize w-fit mt-2 p-1 text-xs rounded ${

@@ -10,6 +10,7 @@ import { MdOutlinePriorityHigh } from "react-icons/md";
 import toast from "react-hot-toast";
 import Listings from "../api/Listings";
 import { useRouter } from 'next/navigation'; // Use useRouter hook
+import Link from "next/link";
 
 
 export default function Page() {
@@ -46,6 +47,11 @@ if (tokens) {
     if (loading == true) {
       return;
     }
+    if(formData?.description=="" || formData?.deadline=="" || formData?.title=="")
+      {
+        toast.error("All fields are mandatory");
+        return;
+      }
     setLoading(true);
     const main = new Listings();
     const response = main.AddTask({
@@ -79,9 +85,11 @@ if (tokens) {
   };
 
   return (
-    <div className="mx-20 py-6 bg-white rounded-lg shadow-md ">
+    <div className="mx-[20px] py-6 ">
       <div className="flex justify-between items-center mb-4">
+        <Link href="/">
         <FaTimes className="cursor-pointer text-gray-600" />
+        </Link>
         <div className="flex space-x-3">
           <FaShareAlt className="cursor-pointer text-gray-600" />
           <FaRegStar className="cursor-pointer text-gray-600" />
